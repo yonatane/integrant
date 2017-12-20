@@ -113,8 +113,11 @@
 #?(:clj
    (defn- keyword->namespaces [kw]
      (if-let [ns (namespace kw)]
-       [(symbol ns)
-        (symbol (str ns "." (name kw)))])))
+       (into
+         [(symbol ns)
+          (symbol (str ns "." (name kw)))]
+         (when-let [kw-ancestors (ancestors kw)]
+           (mapcat keyword->namespaces (conj kw-ancestors)))))))
 
 #?(:clj
    (defn- key->namespaces [k]

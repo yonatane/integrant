@@ -70,6 +70,8 @@
      (remove-ns lib)
      (dosync (alter @#'clojure.core/*loaded-libs* disj lib))))
 
+(derive :integrant.test/derived :integrant.test/parent)
+
 #?(:clj
    (deftest load-namespaces-test
      (testing "all namespaces"
@@ -77,28 +79,34 @@
        (remove-lib 'integrant.test.bar)
        (remove-lib 'integrant.test.baz)
        (remove-lib 'integrant.test.quz)
+       (remove-lib 'integrant.test.parent)
        (is (= (set (ig/load-namespaces {:integrant.test/foo                     1
                                         :integrant.test.bar/wuz                 2
                                         [:integrant.test/baz :integrant.test/x] 3
-                                        [:integrant.test/y :integrant.test/quz] 4}))
+                                        [:integrant.test/y :integrant.test/quz] 4
+                                        :integrant.test/derived                 5}))
               '#{integrant.test.foo
                  integrant.test.bar
                  integrant.test.baz
-                 integrant.test.quz}))
+                 integrant.test.quz
+                 integrant.test.parent}))
        (is (some? (find-ns 'integrant.test.foo)))
        (is (some? (find-ns 'integrant.test.bar)))
        (is (some? (find-ns 'integrant.test.baz)))
        (is (some? (find-ns 'integrant.test.quz)))
+       (is (some? (find-ns 'integrant.test.parent)))
        (is (= (some-> 'integrant.test.foo/message find-var var-get) "foo"))
        (is (= (some-> 'integrant.test.bar/message find-var var-get) "bar"))
        (is (= (some-> 'integrant.test.baz/message find-var var-get) "baz"))
-       (is (= (some-> 'integrant.test.quz/message find-var var-get) "quz")))
+       (is (= (some-> 'integrant.test.quz/message find-var var-get) "quz"))
+       (is (= (some-> 'integrant.test.parent/message find-var var-get) "parent")))
 
      (testing "some namespaces"
        (remove-lib 'integrant.test.foo)
        (remove-lib 'integrant.test.bar)
        (remove-lib 'integrant.test.baz)
        (remove-lib 'integrant.test.quz)
+       (remove-lib 'integrant.test.parent)
        (is (= (set (ig/load-namespaces
                     {:integrant.test/foo 1
                      :integrant.test/bar (ig/ref :integrant.test/foo)
